@@ -1,32 +1,49 @@
 import { useEffect, useState } from "react";
-import { getDreamList, saveDreamList } from "../utils/storage";
+import {
+  getDreamList,
+  saveDreamList,
+  getCollection,
+  saveCollection,
+} from "../utils/storage";
+import CardForm from "../components/CardForm";
+import CardGrid from "../components/CardGrid";
+import CardModal from "../components/CardModal";
 
 export default function DreamList() {
   const [dreamList, setDreamList] = useState(getDreamList());
+  const [collection, setCollection] = useState(getCollection());
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
     saveDreamList(dreamList);
-  }, [dreamList]);
+    saveCollection(collection);
+  }, [dreamList, collection]);
+
+  const addCard = (card) => setDreamList([...dreamList, card]);
+  const removeCard = (id) =>
+    setDreamList(dreamList.filter((card) => card.id !== id));
+  const moveToCollection = (id) => {
+    const card = dreamList.find((c) => c.id === id);
+    if (card) {
+      setCollection([...collection, card]);
+      removeCard(id);
+    }
+  };
 
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-blue-500 mb-2">Dream List</h2>
-      <p className="text-gray-400 mb-4">Cards you’d love to have someday.</p>
-      <button
-        className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-        onClick={() =>
-          setDreamList([...dreamList, { id: Date.now(), name: "Dream Card" }])
-        }
-      >
-        Add Dream Card
-      </button>
-      <ul className="mt-4 space-y-2">
-        {dreamList.map((card) => (
-          <li key={card.id} className="text-gray-200">
-            {card.name}
-          </li>
-        ))}
-      </ul>
+      <h2 className="text-3xl font-bold text-blue-500 mb-4">Dream List</h2>
+      <p className="text-gray-400 mb-4">
+        Cards you’d love to own someday — add them here to keep track!
+      </p>
+      <CardForm onAdd={addCard} />
+      <CardGrid
+        cards={dreamList}
+        onRemove={removeCard}
+        onMove={moveToCollection}
+        onSelect={setSelectedCard}
+      />
+      <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>
   );
 }

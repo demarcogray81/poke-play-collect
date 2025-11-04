@@ -1,34 +1,46 @@
 import { useEffect, useState } from "react";
-import { getCollection, saveCollection } from "../utils/storage";
+import {
+  getCollection,
+  saveCollection,
+  getDreamList,
+  saveDreamList,
+} from "../utils/storage";
+import CardForm from "../components/CardForm";
+import CardGrid from "../components/CardGrid";
+import CardModal from "../components/CardModal";
 
 export default function MyCards() {
   const [collection, setCollection] = useState(getCollection());
+  const [dreamList, setDreamList] = useState(getDreamList());
+  const [selectedCard, setSelectedCard] = useState(null);
 
   useEffect(() => {
     saveCollection(collection);
-  }, [collection]);
+    saveDreamList(dreamList);
+  }, [collection, dreamList]);
+
+  const addCard = (card) => setCollection([...collection, card]);
+  const removeCard = (id) =>
+    setCollection(collection.filter((card) => card.id !== id));
+  const moveToDreamList = (id) => {
+    const card = collection.find((c) => c.id === id);
+    if (card) {
+      setDreamList([...dreamList, card]);
+      removeCard(id);
+    }
+  };
 
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-blue-500 mb-2">My Cards</h2>
-      <p className="text-gray-400 mb-4">
-        This is where your saved collection will go.
-      </p>
-      <button
-        className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
-        onClick={() =>
-          setCollection([...collection, { id: Date.now(), name: "Test Card" }])
-        }
-      >
-        Add Test Card
-      </button>
-      <ul className="mt-4 space-y-2">
-        {collection.map((card) => (
-          <li key={card.id} className="text-gray-200">
-            {card.name}
-          </li>
-        ))}
-      </ul>
+      <h2 className="text-3xl font-bold text-blue-500 mb-4">My Cards</h2>
+      <CardForm onAdd={addCard} />
+      <CardGrid
+        cards={collection}
+        onRemove={removeCard}
+        onMove={moveToDreamList}
+        onSelect={setSelectedCard}
+      />
+      <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>
   );
 }

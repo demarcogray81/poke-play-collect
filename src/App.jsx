@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Cards from "./pages/Cards";
 import MyCards from "./pages/MyCards";
+import DreamList from "./pages/DreamList";
 import "./index.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/cards" element={<Cards />} />
           <Route path="/my-cards" element={<MyCards />} />
           <Route path="*" element={<MyCards />} />
+          <Route path="/dream-list" element={<DreamList />} />
         </Routes>
       </main>
       <Footer />
