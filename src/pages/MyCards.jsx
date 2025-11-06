@@ -30,6 +30,14 @@ export default function MyCards() {
     }
   };
 
+  const toggleOwned = (id) => {
+    setCollection(
+      collection.map((card) =>
+        card.id === id ? { ...card, owned: !card.owned } : card
+      )
+    );
+  };
+
   return (
     <div className="text-center">
       <h2 className="text-3xl font-bold text-blue-500 mb-4">My Cards</h2>
@@ -39,6 +47,7 @@ export default function MyCards() {
         onRemove={removeCard}
         onMove={moveToDreamList}
         onSelect={setSelectedCard}
+        onToggleOwned={toggleOwned}
       />
       <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>

@@ -1,4 +1,10 @@
-export default function CardGrid({ cards, onRemove, onMove, onSelect }) {
+export default function CardGrid({
+  cards,
+  onRemove,
+  onMove,
+  onSelect,
+  onToggleOwned,
+}) {
   if (!cards.length) {
     return <p className="text-gray-400">No cards added yet.</p>;
   }
@@ -8,11 +14,13 @@ export default function CardGrid({ cards, onRemove, onMove, onSelect }) {
       {cards.map((card) => (
         <div
           key={card.id}
-          className="bg-gray-800 border border-gray-700 rounded-lg p-3 flex flex-col items-center text-center hover:shadow-lg hover:border-blue-500 transition cursor-pointer"
-          onClick={() => onSelect(card)}
+          className={`bg-gray-800 border ${
+            card.owned ? "border-green-500" : "border-gray-700"
+          } rounded-lg p-3 flex flex-col items-center text-center hover:shadow-lg transition cursor-pointer`}
+          onClick={() => onSelect && onSelect(card)}
         >
           <img
-            src={card.image || "/vite.svg"}
+            src={card.imageUrl || card.image || "/vite.svg"}
             alt={card.name}
             className="h-24 w-24 object-contain mb-2"
           />
@@ -21,7 +29,21 @@ export default function CardGrid({ cards, onRemove, onMove, onSelect }) {
             <p className="text-sm text-gray-400 mt-1">{card.rarity}</p>
           )}
 
-          <div className="flex gap-2 mt-2">
+          <div className="flex flex-col gap-2 mt-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleOwned(card.id);
+              }}
+              className={`px-3 py-1 text-sm rounded font-semibold ${
+                card.owned
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-yellow-600 hover:bg-yellow-700"
+              }`}
+            >
+              {card.owned ? "Owned" : "Missing"}
+            </button>
+
             {onMove && (
               <button
                 onClick={(e) => {

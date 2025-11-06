@@ -20,13 +20,28 @@ export default function DreamList() {
   }, [dreamList, collection]);
 
   const addCard = (card) => setDreamList([...dreamList, card]);
+
   const removeCard = (id) =>
     setDreamList(dreamList.filter((card) => card.id !== id));
+
   const moveToCollection = (id) => {
     const card = dreamList.find((c) => c.id === id);
     if (card) {
-      setCollection([...collection, card]);
+      setCollection([...collection, { ...card, owned: true }]);
       removeCard(id);
+    }
+  };
+
+  const toggleOwned = (id) => {
+    setDreamList((prevList) =>
+      prevList.map((card) =>
+        card.id === id ? { ...card, owned: !card.owned } : card
+      )
+    );
+
+    const toggledCard = dreamList.find((c) => c.id === id);
+    if (toggledCard && !toggledCard.owned) {
+      moveToCollection(id);
     }
   };
 
@@ -42,6 +57,7 @@ export default function DreamList() {
         onRemove={removeCard}
         onMove={moveToCollection}
         onSelect={setSelectedCard}
+        onToggleOwned={toggleOwned}
       />
       <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>
