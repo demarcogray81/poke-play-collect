@@ -14,6 +14,17 @@ async function fetchWithKey(url) {
   return response;
 }
 
+export async function fetchTCGCards(page = 1, pageSize = 20) {
+  const response = await fetch(
+    `https://api.pokemontcg.io/v2/cards?page=${page}&pageSize=${pageSize}`,
+    {
+      headers: { "X-Api-Key": import.meta.env.VITE_TCG_API_KEY },
+    }
+  );
+  const data = await response.json();
+  return data.data;
+}
+
 export async function fetchTCGCardByName(name) {
   try {
     const query = `q=name:"${name}"&orderBy=-set.releaseDate`;

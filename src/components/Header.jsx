@@ -3,26 +3,27 @@ import SearchBar from "./SearchBar";
 
 export default function Header({ onSearch }) {
   return (
-    <header className="bg-gray-800 text-white py-4 px-6 flex items-center justify-between">
-      <Link to="/" className="text-2xl font-bold text-blue-400">
-        PokéLog
-      </Link>
-
-      <div className="flex-1 flex justify-center px-4">
+    <header className="bg-gray-800 text-white py-4 px-6 flex items-center justify-between shadow-md">
+      {/* Center search bar */}
+      <div className="flex-1 flex justify-center">
         <div className="w-full max-w-lg">
           <SearchBar onSearch={onSearch} />
         </div>
       </div>
 
-      <nav className="flex gap-4">
-        <Link to="/my-cards" className="hover:text-blue-400 transition-colors">
-          Collection
+      {/* Auth buttons */}
+      <nav className="flex gap-3">
+        <Link
+          to="/signin"
+          className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 text-sm font-semibold transition"
+        >
+          Sign In
         </Link>
         <Link
-          to="/dream-list"
-          className="hover:text-blue-400 transition-colors"
+          to="/signup"
+          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-sm font-semibold transition"
         >
-          Dream List
+          Sign Up
         </Link>
       </nav>
     </header>
