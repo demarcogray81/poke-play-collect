@@ -147,7 +147,7 @@ If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
 ### 1. Clone & install
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/demarcogray81/poke-play-collect
 cd poke-play-collect
 npm install
 ```
