@@ -1,93 +1,96 @@
-// src/pages/DreamList.jsx
-import { useEffect, useState } from "react";
-import {
-  getCollection,
-  saveCollection,
-  getDreamList,
-  saveDreamList,
-} from "../utils/storage";
-import CardForm from "../components/CardForm";
+import { useMemo, useState } from "react";
 import CardGrid from "../components/CardGrid";
 import CardModal from "../components/CardModal";
 import { TYPE_FILTER_OPTIONS, matchesTypeFilter } from "../utils/cardFilters";
 
-export default function DreamList() {
-  const [collection, setCollection] = useState(getCollection());
-  const [dreamList, setDreamList] = useState(getDreamList());
+export default function DreamList({
+  dreamList,
+  setDreamList,
+  collection,
+  setCollection,
+}) {
   const [selectedCard, setSelectedCard] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("name-asc");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  useEffect(() => {
-    saveCollection(collection);
-    saveDreamList(dreamList);
-  }, [collection, dreamList]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [pendingAction, setPendingAction] = useState(null);
 
-  const addCard = (card) => setDreamList([...dreamList, card]);
-
-  const removeCard = (id) =>
+  const removeFromDreamList = (id) => {
     setDreamList(dreamList.filter((card) => card.id !== id));
+  };
 
-  const moveToCollection = (id) => {
-    const card = dreamList.find((c) => c.id === id);
-    if (card) {
+  const moveToCollection = (card) => {
+    if (!collection.some((c) => c.id === card.id)) {
       setCollection([...collection, { ...card, owned: true }]);
-      removeCard(id);
     }
+    setDreamList(dreamList.filter((c) => c.id !== card.id));
   };
 
-  const toggleOwned = (id) => {
-    setDreamList(
-      dreamList.map((card) =>
-        card.id === id ? { ...card, owned: !card.owned } : card
-      )
+  const openConfirm = (message, action) => {
+    setConfirmText(message);
+    setPendingAction(() => action);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    if (pendingAction) pendingAction();
+    setConfirmOpen(false);
+    setPendingAction(null);
+  };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+    setPendingAction(null);
+  };
+
+  const sorted = useMemo(() => {
+    let result = [...dreamList];
+
+    result = result.filter((card) =>
+      (card.name || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
-  };
 
-  const filtered = dreamList
-    .filter((card) =>
-      card.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((card) => {
-      if (rarityFilter === "all") return true;
-      if (!card.rarity) return false;
-      return card.rarity.toLowerCase() === rarityFilter.toLowerCase();
-    })
-    .filter((card) => matchesTypeFilter(card, typeFilter));
-
-  const sorted = [...filtered].sort((a, b) => {
-    const nameA = a.name || "";
-    const nameB = b.name || "";
-
-    switch (sortOption) {
-      case "name-asc":
-        return nameA.localeCompare(nameB);
-      case "name-desc":
-        return nameB.localeCompare(nameA);
-      default:
-        return 0;
+    if (rarityFilter !== "all") {
+      result = result.filter(
+        (card) =>
+          card.rarity &&
+          card.rarity.toLowerCase() === rarityFilter.toLowerCase()
+      );
     }
-  });
+
+    result = result.filter((card) => matchesTypeFilter(card, typeFilter));
+
+    result.sort((a, b) => {
+      const nameA = a.name || "";
+      const nameB = b.name || "";
+
+      switch (sortOption) {
+        case "name-asc":
+          return nameA.localeCompare(nameB);
+        case "name-desc":
+          return nameB.localeCompare(nameA);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [dreamList, searchTerm, rarityFilter, typeFilter, sortOption]);
 
   return (
     <div className="text-center">
-      <h2 className="text-3xl font-bold text-blue-500 mb-1">Dream List</h2>
-      <p className="text-gray-400 mb-4 text-sm">
-        Cards you’d love to own someday — add them here to keep track!
-      </p>
+      <h2 className="text-3xl font-bold text-pink-400 mb-4">Dream List</h2>
 
-      <CardForm onAdd={addCard} />
-
-      {/* Filters to match Home / Collection */}
-      <div className="mt-6 flex flex-wrap justify-center gap-3 mb-2">
+      <div className="mt-2 flex flex-wrap justify-center gap-3 mb-2">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search cards..."
+          placeholder="Search dream cards..."
           className="px-3 py-2 rounded bg-gray-800 text-white text-sm border border-gray-700 w-56"
         />
 
@@ -137,14 +140,45 @@ export default function DreamList() {
 
       <CardGrid
         cards={sorted}
-        onRemove={removeCard}
-        onMove={moveToCollection}
         onSelect={setSelectedCard}
-        onToggleOwned={toggleOwned}
+        onMove={(card) =>
+          openConfirm("Move this card to your Collection?", () =>
+            moveToCollection(card)
+          )
+        }
+        onRemove={(id) =>
+          openConfirm("Remove this card from your Dream List?", () =>
+            removeFromDreamList(id)
+          )
+        }
         moveLabel="Move to Collection"
       />
 
       <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
+
+      {confirmOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-4 max-w-sm w-full shadow-lg">
+            <p className="text-sm text-gray-100 mb-4">{confirmText}</p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirm}
+                className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-sm"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

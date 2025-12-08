@@ -16,7 +16,6 @@ export default function FilterBar({
       className="flex flex-col md:flex-row items-center justify-between gap-3
                     bg-gray-800 p-4 rounded-lg shadow-md mb-6"
     >
-      {/* Search */}
       <input
         type="text"
         placeholder="Search cards..."
@@ -25,7 +24,6 @@ export default function FilterBar({
         className="w-full md:w-1/3 px-3 py-2 rounded bg-gray-700 text-white"
       />
 
-      {/* Rarity Filter */}
       <select
         value={filterRarity}
         onChange={(e) => onFilterRarity(e.target.value)}
@@ -44,7 +42,6 @@ export default function FilterBar({
         <option value="Secret Rare">Secret Rare</option>
       </select>
 
-      {/* Owned Filter */}
       <select
         value={filterOwned}
         onChange={(e) => onShowOwned(e.target.value)}
@@ -55,7 +52,6 @@ export default function FilterBar({
         <option value="missing">Missing Only</option>
       </select>
 
-      {/* Sort Dropdown */}
       <select
         value={sortOption}
         onChange={(e) => onSort(e.target.value)}
@@ -69,7 +65,6 @@ export default function FilterBar({
         <option value="missing-first">Missing First</option>
       </select>
 
-      {/* Reset Button */}
       <button
         onClick={onReset}
         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"

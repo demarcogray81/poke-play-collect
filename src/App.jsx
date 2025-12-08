@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import useAuth from "./hooks/useAuth";
+
 import Header from "./components/Header";
 import Sidebar from "./components/SideBar";
 import MyCards from "./pages/MyCards";
@@ -9,7 +11,9 @@ import Footer from "./components/Footer";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Home from "./pages/Home";
+
 import {
+  ensureStorageVersion,
   getCollection,
   saveCollection,
   getDreamList,
@@ -17,8 +21,14 @@ import {
 } from "./utils/storage";
 
 export default function App() {
-  const [collection, setCollection] = useState(getCollection());
-  const [dreamList, setDreamList] = useState(getDreamList());
+  const [collection, setCollection] = useState(() => {
+    ensureStorageVersion();
+    return getCollection() || [];
+  });
+  const [dreamList, setDreamList] = useState(getDreamList() || []);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const { loggedIn, user, signup, login, logout } = useAuth();
 
   useEffect(() => {
     saveCollection(collection);
@@ -26,32 +36,33 @@ export default function App() {
   }, [collection, dreamList]);
 
   const addToCollection = (card) => {
-    // prevent duplicates
-    if (!collection.some((c) => c.id === card.id)) {
-      const updated = [...collection, { ...card, owned: false }];
-      setCollection(updated);
-      saveCollection(updated);
-    }
+    setCollection((prev) => {
+      if (prev.some((c) => c.id === card.id)) return prev;
+
+      return [...prev, { ...card, owned: true }];
+    });
   };
 
   const addToDreamList = (card) => {
     if (!dreamList.some((c) => c.id === card.id)) {
-      const updated = [...dreamList, card];
+      const updated = [...dreamList, { ...card, owned: false }];
       setDreamList(updated);
-      saveDreamList(updated);
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="flex min-h-screen bg-gray-900 text-white overflow-x-hidden">
+      <Sidebar loggedIn={loggedIn} onLogout={logout} />
 
-      {/* Main content section */}
-      <div className="flex flex-col flex-1">
-        <Header />
+      <div className="flex flex-col flex-1 w-full">
+        <Header
+          onSearch={setSearchTerm}
+          loggedIn={loggedIn}
+          user={user}
+          onLogout={logout}
+        />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+        <main className="flex-1 p-4 md:p-6">
           <Routes>
             <Route
               path="/"
@@ -59,15 +70,41 @@ export default function App() {
                 <Home
                   onAddToCollection={addToCollection}
                   onAddToDreamList={addToDreamList}
+                  searchTerm={searchTerm}
                 />
               }
             />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/my-cards" element={<MyCards />} />
-            <Route path="/dream-list" element={<DreamList />} />
+
+            <Route path="/signin" element={<SignIn onSignIn={login} />} />
+            <Route path="/signup" element={<SignUp onSignUp={signup} />} />
+
+            <Route
+              path="/my-cards"
+              element={
+                <MyCards
+                  collection={collection}
+                  setCollection={setCollection}
+                  dreamList={dreamList}
+                  setDreamList={setDreamList}
+                />
+              }
+            />
+
+            <Route
+              path="/dream-list"
+              element={
+                <DreamList
+                  collection={collection}
+                  setCollection={setCollection}
+                  dreamList={dreamList}
+                  setDreamList={setDreamList}
+                />
+              }
+            />
+
             <Route path="/backup" element={<Backup />} />
-            <Route path="*" element={<MyCards />} />
+
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
 

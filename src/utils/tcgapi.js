@@ -1,57 +1,76 @@
-const API_BASE = "https://api.pokemontcg.io/v2/cards";
-const API_KEY = import.meta.env.VITE_TCG_API_KEY;
+import { cacheRead, cacheWrite } from "./cache";
 
-async function fetchWithKey(url) {
-  console.log("🔵 Calling:", url);
-  console.log("🔑 API KEY loaded:", API_KEY ? "✅ YES" : "❌ NO");
+const API_BASE = "/api/tcg/cards";
 
-  const response = await fetch(url, {
-    headers: { "X-Api-Key": API_KEY },
+async function rawFetch(params = {}) {
+  const url = new URL(API_BASE, window.location.origin);
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, String(value));
+    }
   });
 
-  console.log("📡 Status:", response.status);
+  const res = await fetch(url.toString());
 
-  return response;
+  if (!res.ok) {
+    throw new Error(`TCG proxy/API error: ${res.status} ${res.statusText}`);
+  }
+
+  return res.json();
 }
 
-export async function fetchTCGCards(page = 1, pageSize = 20) {
-  const response = await fetch(
-    `https://api.pokemontcg.io/v2/cards?page=${page}&pageSize=${pageSize}`,
-    {
-      headers: { "X-Api-Key": import.meta.env.VITE_TCG_API_KEY },
-    }
-  );
-  const data = await response.json();
-  return data.data;
+function normalizeTCGCard(card) {
+  if (!card) return null;
+  return {
+    ...card,
+    id: card.id,
+    name: card.name,
+    rarity: card.rarity || "Unknown",
+    images: card.images || {},
+  };
+}
+
+export async function fetchTrendingCards(page = 1, pageSize = 24) {
+  const json = await rawFetch({
+    page,
+    pageSize,
+    orderBy: "-set.releaseDate",
+  });
+
+  const rawCards = Array.isArray(json.data) ? json.data : [];
+  return rawCards.map(normalizeTCGCard);
 }
 
 export async function fetchTCGCardByName(name) {
-  try {
-    const query = `q=name:"${name}"&orderBy=-set.releaseDate`;
-    console.log("🟣 Searching for:", name);
+  const json = await rawFetch({
+    q: `name:"${name}"`,
+    pageSize: 1,
+  });
 
-    const response = await fetchWithKey(`${API_BASE}?${query}`);
-    if (!response.ok) throw new Error("Failed to fetch card data");
-
-    const data = await response.json();
-
-    console.log("🟣 API responded with:", data);
-
-    return data.data?.[0] || null;
-  } catch (error) {
-    console.error("Error fetching TCG card:", error);
-    return null;
-  }
+  const first = Array.isArray(json.data) ? json.data[0] : null;
+  return normalizeTCGCard(first);
 }
 
 export async function fetchTCGCardNames() {
-  try {
-    const response = await fetchWithKey(`${API_BASE}?pageSize=250`);
-    if (!response.ok) throw new Error("Failed to fetch card list");
-    const data = await response.json();
-    return data.data.map((card) => card.name);
-  } catch (error) {
-    console.error("Error fetching TCG card names:", error);
-    return [];
+  const CACHE_KEY = "tcg_pokemon_names_v1";
+
+  const cached = cacheRead?.(CACHE_KEY);
+  if (cached && Array.isArray(cached) && cached.length > 0) {
+    return cached;
   }
+
+  const json = await rawFetch({
+    pageSize: 100,
+    orderBy: "name",
+  });
+
+  const data = Array.isArray(json.data) ? json.data : [];
+
+  const names = Array.from(
+    new Set(data.map((c) => c.name).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+
+  cacheWrite?.(CACHE_KEY, names);
+  return names;
 }

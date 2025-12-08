@@ -1,42 +1,39 @@
-// src/pages/MyCards.jsx
-import { useEffect, useState } from "react";
-import {
-  getCollection,
-  saveCollection,
-  getDreamList,
-  saveDreamList,
-} from "../utils/storage";
+import { useMemo, useState } from "react";
 import CardForm from "../components/CardForm";
 import CardGrid from "../components/CardGrid";
 import CardModal from "../components/CardModal";
 import { TYPE_FILTER_OPTIONS, matchesTypeFilter } from "../utils/cardFilters";
 
-export default function MyCards() {
-  const [collection, setCollection] = useState(getCollection());
-  const [dreamList, setDreamList] = useState(getDreamList());
+export default function MyCards({
+  collection,
+  setCollection,
+  dreamList,
+  setDreamList,
+}) {
   const [selectedCard, setSelectedCard] = useState(null);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOption, setSortOption] = useState("name-asc");
   const [rarityFilter, setRarityFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  useEffect(() => {
-    saveCollection(collection);
-    saveDreamList(dreamList);
-  }, [collection, dreamList]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const [pendingAction, setPendingAction] = useState(null);
 
-  const addCard = (card) => setCollection([...collection, card]);
+  const addCard = (card) => {
+    const withOwned = { ...card, owned: true };
+    setCollection([...collection, withOwned]);
+  };
 
-  const removeCard = (id) =>
+  const removeCard = (id) => {
     setCollection(collection.filter((card) => card.id !== id));
+  };
 
-  const moveToDreamList = (id) => {
-    const card = collection.find((c) => c.id === id);
-    if (card) {
+  const moveToDreamList = (card) => {
+    if (!dreamList.some((c) => c.id === card.id)) {
       setDreamList([...dreamList, { ...card, owned: false }]);
-      removeCard(id);
     }
+    setCollection(collection.filter((c) => c.id !== card.id));
   };
 
   const toggleOwned = (id) => {
@@ -47,34 +44,60 @@ export default function MyCards() {
     );
   };
 
-  const filtered = collection
-    .filter((card) =>
-      card.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((card) => {
-      if (rarityFilter === "all") return true;
-      if (!card.rarity) return false;
-      return card.rarity.toLowerCase() === rarityFilter.toLowerCase();
-    })
-    .filter((card) => matchesTypeFilter(card, typeFilter));
+  const openConfirm = (message, action) => {
+    setConfirmText(message);
+    setPendingAction(() => action);
+    setConfirmOpen(true);
+  };
 
-  const sorted = [...filtered].sort((a, b) => {
-    const nameA = a.name || "";
-    const nameB = b.name || "";
+  const handleConfirm = () => {
+    if (pendingAction) pendingAction();
+    setConfirmOpen(false);
+    setPendingAction(null);
+  };
 
-    switch (sortOption) {
-      case "name-asc":
-        return nameA.localeCompare(nameB);
-      case "name-desc":
-        return nameB.localeCompare(nameA);
-      case "owned-first":
-        return (b.owned ? 1 : 0) - (a.owned ? 1 : 0);
-      case "missing-first":
-        return (a.owned ? 1 : 0) - (b.owned ? 1 : 0);
-      default:
-        return 0;
+  const handleCancel = () => {
+    setConfirmOpen(false);
+    setPendingAction(null);
+  };
+
+  const sorted = useMemo(() => {
+    let result = [...collection];
+
+    result = result.filter((card) =>
+      (card.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (rarityFilter !== "all") {
+      result = result.filter(
+        (card) =>
+          card.rarity &&
+          card.rarity.toLowerCase() === rarityFilter.toLowerCase()
+      );
     }
-  });
+
+    result = result.filter((card) => matchesTypeFilter(card, typeFilter));
+
+    result.sort((a, b) => {
+      const nameA = a.name || "";
+      const nameB = b.name || "";
+
+      switch (sortOption) {
+        case "name-asc":
+          return nameA.localeCompare(nameB);
+        case "name-desc":
+          return nameB.localeCompare(nameA);
+        case "owned-first":
+          return (b.owned ? 1 : 0) - (a.owned ? 1 : 0);
+        case "missing-first":
+          return (a.owned ? 1 : 0) - (b.owned ? 1 : 0);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
+  }, [collection, searchTerm, rarityFilter, typeFilter, sortOption]);
 
   return (
     <div className="text-center">
@@ -82,9 +105,7 @@ export default function MyCards() {
 
       <CardForm onAdd={addCard} />
 
-      {/* Filters to match Home layout */}
       <div className="mt-6 flex flex-wrap justify-center gap-3 mb-2">
-        {/* Search (local to page, header search still global) */}
         <input
           type="text"
           value={searchTerm}
@@ -141,15 +162,50 @@ export default function MyCards() {
 
       <CardGrid
         cards={sorted}
-        onRemove={removeCard}
-        onMove={moveToDreamList}
         onSelect={setSelectedCard}
-        onToggleOwned={toggleOwned}
+        onToggleOwned={(id) =>
+          openConfirm("Toggle owned status for this card?", () =>
+            toggleOwned(id)
+          )
+        }
+        onMove={(card) =>
+          openConfirm("Move this card to your Dream List?", () =>
+            moveToDreamList(card)
+          )
+        }
+        onRemove={(id) =>
+          openConfirm("Delete this card from your Collection?", () =>
+            removeCard(id)
+          )
+        }
         moveLabel="Move to Dream List"
       />
 
-      {/* Same CardModal style as Home */}
       <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
+
+      {confirmOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-4 max-w-sm w-full shadow-lg">
+            <p className="text-sm text-gray-100 mb-4">{confirmText}</p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirm}
+                className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-sm"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
