@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import express from "express";
 import cors from "cors";
 import fetch from "node-fetch";
@@ -7,11 +8,11 @@ import fetch from "node-fetch";
 const app = express();
 
 const TCG_API_BASE = "https://api.pokemontcg.io/v2/cards";
-const TCG_API_KEY = process.env.VITE_TCG_API_KEY;
+const TCG_API_KEY = process.env.VITE_TCG_API_KEY || "";
 
 if (!TCG_API_KEY) {
-  console.warn(
-    "⚠️ VITE_TCG_API_KEY is not set in .env — PokémonTCG requests will fail."
+  console.log(
+    "ℹ️ No VITE_TCG_API_KEY set. Using anonymous access to PokémonTCG (OK for review, just lower rate limits)."
   );
 }
 
@@ -31,18 +32,20 @@ app.get("/api/tcg/cards", async (req, res) => {
       }
     });
 
-    const apiRes = await fetch(url.toString(), {
-      headers: {
-        "X-Api-Key": TCG_API_KEY,
-      },
-    });
+    const headers = {};
+    if (TCG_API_KEY) {
+      headers["X-Api-Key"] = TCG_API_KEY;
+    }
+
+    const apiRes = await fetch(url.toString(), { headers });
 
     if (!apiRes.ok) {
       const text = await apiRes.text().catch(() => "");
-      console.error("PokémonTCG error:", apiRes.status, text);
-      return res
-        .status(apiRes.status)
-        .json({ error: `PokémonTCG error ${apiRes.status}` });
+      console.error("PokémonTCG error:", apiRes.status, text.slice(0, 200));
+      return res.status(502).json({
+        error: "Upstream PokémonTCG API error",
+        status: apiRes.status,
+      });
     }
 
     const data = await apiRes.json();

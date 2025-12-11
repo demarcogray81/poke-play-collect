@@ -1,9 +1,10 @@
 import { cacheRead, cacheWrite } from "./cache";
 
-const API_BASE = "/api/tcg/cards";
+const TCG_PROXY_BASE =
+  import.meta.env.VITE_TCG_PROXY_BASE || "http://localhost:5174/api/tcg/cards";
 
 async function rawFetch(params = {}) {
-  const url = new URL(API_BASE, window.location.origin);
+  const url = new URL(TCG_PROXY_BASE);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -38,18 +39,14 @@ export async function fetchTrendingCards(page = 1, pageSize = 24) {
     orderBy: "-set.releaseDate",
   });
 
-  const rawCards = Array.isArray(json.data) ? json.data : [];
-  return rawCards.map(normalizeTCGCard);
+  const cards = Array.isArray(json.data) ? json.data : [];
+  return cards.map(normalizeTCGCard);
 }
 
 export async function fetchTCGCardByName(name) {
-  const json = await rawFetch({
-    q: `name:"${name}"`,
-    pageSize: 1,
-  });
-
-  const first = Array.isArray(json.data) ? json.data[0] : null;
-  return normalizeTCGCard(first);
+  const json = await rawFetch({ q: `name:${name}`, pageSize: 1 });
+  const card = Array.isArray(json.data) ? json.data[0] : null;
+  return normalizeTCGCard(card);
 }
 
 export async function fetchTCGCardNames() {
