@@ -121,8 +121,9 @@ npm install
 
 2. Create a .env file in the project root with:
 
-VITE_TCG_API_KEY=your_real_pokemontcg_key_here
-VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
+- VITE_TCG_API_KEY=your_real_pokemontcg_key_here
+  
+- VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
 
 
 3. Start the Pokémon TCG proxy server (Terminal 1):
