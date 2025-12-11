@@ -113,34 +113,36 @@ If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
 
 ## 🖥 How to run locally
 
-1. Clone the repo and install dependencies:
+1. **Clone the repo and install dependencies:**
 
-  git clone https://github.com/demarcogray81/poke-play-collect.git
-
-  cd poke-play-collect
-
-  npm install
-
+   ```bash
+   git clone https://github.com/demarcogray81/poke-play-collect.git
+   cd poke-play-collect
+   npm install
+   ```
+   
 2. Create a .env file in the project root with:
 
-  VITE_TCG_API_KEY=your_real_pokemontcg_key_here
-  
-  VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
-
+   ```bash 
+   VITE_TCG_API_KEY=your_real_pokemontcg_key_here
+   VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
+   ```
 
 3. Start the Pokémon TCG proxy server (Terminal 1):
 
-  npm run proxy
-
+   ```bash
+   npm run proxy
+   ```
 
 4. Start the React dev server (Terminal 2):
 
-  npm run dev
-
+   ```bash
+   npm run dev
+   ```
 
 5. Open the app in your browser:
 
-  http://localhost:5173
+   http://localhost:5173
 
 ---
 
