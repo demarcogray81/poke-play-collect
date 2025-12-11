@@ -81,6 +81,66 @@ This is implemented completely in the frontend using the browser’s file APIs.
 
 ---
 
+## 🌐 External API & Proxy
+
+Direct calls from the browser to the Pokémon TCG API hit CORS limits, so this project uses a tiny Node proxy:
+
+- Frontend calls:
+  - `GET http://localhost:5174/api/tcg/cards?...`
+- Proxy forwards that to:
+  - `https://api.pokemontcg.io/v2/cards?...`
+- Adds the `X-Api-Key` header using your secret key from `.env`.
+- Returns the JSON to the React app.
+
+This keeps your API key out of the frontend bundle and bypasses browser CORS restrictions.
+
+Used endpoints (via the proxy):
+
+- **Trending / new cards** for Home:
+  - `GET /cards?page=…&pageSize=…&orderBy=-set.releaseDate`
+- **Card search by name** for CardForm:
+  - `GET /cards?q=name:"<card name>"&pageSize=1`
+- **Name suggestions** for autocomplete:
+  - `GET /cards?pageSize=250` (first page, then map to unique names)
+
+If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
+
+- Logs the error to the console,
+- Shows an inline message on Home like  
+  _“Couldn’t load trending cards from the TCG API. You can still use your Collection and Dream List as normal.”_
+
+---
+
+## 🖥 How to run locally
+
+1. Clone the repo and install dependencies:
+
+git clone https://github.com/demarcogray81/poke-play-collect.git
+cd poke-play-collect
+npm install
+
+2. Create a .env file in the project root with:
+
+VITE_TCG_API_KEY=your_real_pokemontcg_key_here
+VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
+
+
+3. Start the Pokémon TCG proxy server (Terminal 1):
+
+npm run proxy
+
+
+4. Start the React dev server (Terminal 2):
+
+npm run dev
+
+
+5. Open the app in your browser:
+
+http://localhost:5173
+
+---
+
 ## Coming Soon
 
 ### Trends Page
@@ -112,42 +172,3 @@ Add preset visual themes inspired by Pokémon types and items. For example:
 
 Users will be able to pick a theme from a simple menu, and the app’s colors will update automatically
 
-## 🌐 External API & Proxy
-
-Direct calls from the browser to the Pokémon TCG API hit CORS limits, so this project uses a tiny Node proxy:
-
-- Frontend calls:
-  - `GET http://localhost:5174/api/tcg/cards?...`
-- Proxy forwards that to:
-  - `https://api.pokemontcg.io/v2/cards?...`
-- Adds the `X-Api-Key` header using your secret key from `.env`.
-- Returns the JSON to the React app.
-
-This keeps your API key out of the frontend bundle and bypasses browser CORS restrictions.
-
-Used endpoints (via the proxy):
-
-- **Trending / new cards** for Home:
-  - `GET /cards?page=…&pageSize=…&orderBy=-set.releaseDate`
-- **Card search by name** for CardForm:
-  - `GET /cards?q=name:"<card name>"&pageSize=1`
-- **Name suggestions** for autocomplete:
-  - `GET /cards?pageSize=250` (first page, then map to unique names)
-
-If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
-
-- Logs the error to the console,
-- Shows an inline message on Home like  
-  _“Couldn’t load trending cards from the TCG API. You can still use your Collection and Dream List as normal.”_
-
----
-
-## ⚙️ Getting Started
-
-### 1. Clone & install
-
-```bash
-git clone https://github.com/demarcogray81/poke-play-collect
-cd poke-play-collect
-npm install
-```
