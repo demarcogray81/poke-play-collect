@@ -116,7 +116,9 @@ If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
 1. Clone the repo and install dependencies:
 
 git clone https://github.com/demarcogray81/poke-play-collect.git
+
 cd poke-play-collect
+
 npm install
 
 2. Create a .env file in the project root with:
