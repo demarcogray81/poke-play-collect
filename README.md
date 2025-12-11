@@ -111,54 +111,27 @@ If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
 
 ---
 
-## 🖥 How to run locally
+## 🖥 How to run locally 
 
 1. **Clone the repo and install dependencies:**
-
-   ```bash
+bash
    git clone https://github.com/demarcogray81/poke-play-collect.git
    cd poke-play-collect
    npm install
-   ```
-
+   
 2. Create a .env file in the project root with:
-
-   ```bash
-   VITE_TCG_API_KEY=your_real_pokemontcg_key_here
-   VITE_TCG<<<<<<< HEAD
-
-   ```
-
-3. Create a .env file in the project root with:
-
-   ```bash
-   =======
-
-   ```
-
-4. Create a .env file in the project root with:
-
-   ```bash
-   >>>>>>> 3c8f11d (Fix API integration and update README for deployment)
+bash 
    VITE_TCG_API_KEY=your_real_pokemontcg_key_here
    VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
-   ```
-
-5. Start the Pokémon TCG proxy server (Terminal 1):
-
-   ```bash
+   
+3. Start the Pokémon TCG proxy server (Terminal 1):
+bash
    npm run proxy
-   ```
-
-6. Start the React dev server (Terminal 2):
-
-   ```bash
+   
+4. Start the React dev server (Terminal 2):
+bash
    npm run dev
-   ```
-
-7. Open the app in your browser:
-
-   http://localhost:5173
+5. Open the app in your browser: http://localhost:5173 
 
 ---
 
@@ -192,8 +165,3 @@ Add preset visual themes inspired by Pokémon types and items. For example:
 - **Potion Theme** – soft purples/greens with subtle glow effects
 
 Users will be able to pick a theme from a simple menu, and the app’s colors will update automatically
-<<<<<<< HEAD
-
-=======
-
-> > > > > > > 3c8f11d (Fix API integration and update README for deployment)
