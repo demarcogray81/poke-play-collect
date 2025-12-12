@@ -9,7 +9,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "proxy": "node server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -48,5 +50,5 @@
   "bugs": {
     "url": "https://github.com/demarcogray81/poke-play-collect/issues"
   },
-  "homepage": "https://github.com/demarcogray81/poke-play-collect#readme"
+  "homepage": "https://demarcogray81.github.io/poke-play-collect"
 }
