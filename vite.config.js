@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   const proxyPort = env.PROXY_PORT || "5174";
 
   return {
+    base: "/poke-play-collect/",
     plugins: [react()],
     server: {
       proxy: {
