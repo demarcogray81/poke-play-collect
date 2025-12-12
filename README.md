@@ -6,6 +6,16 @@ It’s built as a React single-page application that talks to the **Pokémon TCG
 
 ---
 
+## Live Demo (Frontend)
+
+https://demarcogray81.github.io/poke-play-collect
+
+## Live API (Backend Proxy)
+
+https://poke-play-collect.onrender.com/api/tcg/cards
+
+---
+
 ## ✨ Features
 
 ### 🏠 Home – New & Trending Cards
