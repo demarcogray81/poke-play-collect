@@ -1,8 +1,10 @@
 import { cacheRead, cacheWrite } from "./cache";
 
+const PROD_PROXY = "https://poke-play-collect.onrender.com/api/tcg/cards";
+const LOCAL_PROXY = "http://localhost:5174/api/tcg/cards";
+
 const TCG_PROXY_BASE =
-  import.meta.env.VITE_TCG_PROXY_BASE ||
-  "https://poke-play-collect.onrender.com/api/tcg/cards";
+  window.location.hostname === "localhost" ? LOCAL_PROXY : PROD_PROXY;
 
 async function rawFetch(params = {}) {
   const url = new URL(TCG_PROXY_BASE);
