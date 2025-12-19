@@ -16,11 +16,7 @@ if (!TCG_API_KEY) {
   );
 }
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  })
-);
+app.use(cors());
 
 app.get("/api/tcg/cards", async (req, res) => {
   try {
