@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 import useAuth from "./hooks/useAuth";
 
 import Header from "./components/Header";
@@ -20,7 +26,19 @@ import {
   saveDreamList,
 } from "./utils/storage";
 
+// Simple route guard
+function RequireAuth({ loggedIn, children }) {
+  const location = useLocation();
+  if (!loggedIn) {
+    // send them home (or change to "/signin" if you prefer)
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+  return children;
+}
+
 export default function App() {
+  const navigate = useNavigate();
+
   const [collection, setCollection] = useState(() => {
     ensureStorageVersion();
     return getCollection() || [];
@@ -35,10 +53,14 @@ export default function App() {
     saveDreamList(dreamList);
   }, [collection, dreamList]);
 
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true }); // ✅ always return home on sign out
+  };
+
   const addToCollection = (card) => {
     setCollection((prev) => {
       if (prev.some((c) => c.id === card.id)) return prev;
-
       return [...prev, { ...card, owned: true }];
     });
   };
@@ -52,14 +74,14 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-white overflow-x-hidden">
-      <Sidebar loggedIn={loggedIn} onLogout={logout} />
+      <Sidebar loggedIn={loggedIn} onLogout={handleLogout} />
 
       <div className="flex flex-col flex-1 w-full">
         <Header
           onSearch={setSearchTerm}
           loggedIn={loggedIn}
           user={user}
-          onLogout={logout}
+          onLogout={handleLogout}
         />
 
         <main className="flex-1 p-4 md:p-6">
@@ -75,34 +97,63 @@ export default function App() {
               }
             />
 
-            <Route path="/signin" element={<SignIn onSignIn={login} />} />
-            <Route path="/signup" element={<SignUp onSignUp={signup} />} />
+            <Route
+              path="/signin"
+              element={
+                loggedIn ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <SignIn onSignIn={login} />
+                )
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                loggedIn ? (
+                  <Navigate to="/" replace />
+                ) : (
+                  <SignUp onSignUp={signup} />
+                )
+              }
+            />
 
             <Route
               path="/my-cards"
               element={
-                <MyCards
-                  collection={collection}
-                  setCollection={setCollection}
-                  dreamList={dreamList}
-                  setDreamList={setDreamList}
-                />
+                <RequireAuth loggedIn={loggedIn}>
+                  <MyCards
+                    collection={collection}
+                    setCollection={setCollection}
+                    dreamList={dreamList}
+                    setDreamList={setDreamList}
+                  />
+                </RequireAuth>
               }
             />
 
             <Route
               path="/dream-list"
               element={
-                <DreamList
-                  collection={collection}
-                  setCollection={setCollection}
-                  dreamList={dreamList}
-                  setDreamList={setDreamList}
-                />
+                <RequireAuth loggedIn={loggedIn}>
+                  <DreamList
+                    collection={collection}
+                    setCollection={setCollection}
+                    dreamList={dreamList}
+                    setDreamList={setDreamList}
+                  />
+                </RequireAuth>
               }
             />
 
-            <Route path="/backup" element={<Backup />} />
+            <Route
+              path="/backup"
+              element={
+                <RequireAuth loggedIn={loggedIn}>
+                  <Backup />
+                </RequireAuth>
+              }
+            />
 
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
