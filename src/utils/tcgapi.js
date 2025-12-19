@@ -1,13 +1,12 @@
 import { cacheRead, cacheWrite } from "./cache";
 
 const PROD_PROXY = "https://poke-play-collect.onrender.com/api/tcg/cards";
-const LOCAL_PROXY = "http://localhost:5174/api/tcg/cards";
+const DEV_PROXY = "/api/tcg/cards";
 
-const TCG_PROXY_BASE =
-  window.location.hostname === "localhost" ? LOCAL_PROXY : PROD_PROXY;
+const TCG_PROXY_BASE = import.meta.env.DEV ? DEV_PROXY : PROD_PROXY;
 
 async function rawFetch(params = {}) {
-  const url = new URL(TCG_PROXY_BASE);
+  const url = new URL(TCG_PROXY_BASE, window.location.origin);
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -16,11 +15,8 @@ async function rawFetch(params = {}) {
   });
 
   const res = await fetch(url.toString());
-
-  if (!res.ok) {
+  if (!res.ok)
     throw new Error(`TCG proxy/API error: ${res.status} ${res.statusText}`);
-  }
-
   return res.json();
 }
 

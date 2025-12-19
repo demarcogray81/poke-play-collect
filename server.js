@@ -56,7 +56,7 @@ app.get("/api/tcg/cards", async (req, res) => {
   }
 });
 
-const PORT = process.env.PROXY_PORT || 5174;
+const PORT = process.env.PORT || process.env.PROXY_PORT || 5174;
 app.listen(PORT, () => {
-  console.log(`Proxy listening on http://localhost:${PORT}`);
+  console.log(`Proxy listening on port ${PORT}`);
 });
