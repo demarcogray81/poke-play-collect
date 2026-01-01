@@ -19,30 +19,30 @@ export default function Header({ onSearch, loggedIn, user, onLogout }) {
   const initial = user?.email?.[0]?.toUpperCase() || "P";
 
   return (
-    <header className="bg-gray-800 text-white py-4 px-6 flex items-center justify-between shadow-md">
-      <div className="w-32" />
-
+    <header className="bg-gray-800 text-white py-4 px-4 sm:px-6 flex items-center justify-between shadow-md">
+      {" "}
+      <div className="hidden sm:block w-32" />
       <div className="flex-1 flex justify-center">
         <div className="w-full max-w-lg">
           <SearchBar onSearch={onSearch} />
         </div>
       </div>
-
       <div
-        className="w-32 flex justify-end items-center relative"
+        className="w-auto sm:w-32 flex justify-end items-center relative"
         ref={menuRef}
       >
         {!loggedIn ? (
           <nav className="flex gap-3">
             <Link
               to="/signin"
-              className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-xs font-semibold transition"
+              className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 hover:text-white hover:scale-[1.03]text-xs font-semibold transition-colors duration-150"
             >
               Sign In
             </Link>
+
             <Link
               to="/signup"
-              className="px-3 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-xs font-semibold transition"
+              className="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 hover:text-white hover:scale-[1.03]text-xs font-semibold transition-colors duration-150"
             >
               Sign Up
             </Link>

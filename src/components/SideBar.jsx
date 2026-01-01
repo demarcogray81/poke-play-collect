@@ -1,16 +1,25 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import pokelogFull from "../assets/pokelog-logo.png";
 import pokelogIcon from "../assets/pokelog-logo-only.svg";
+import {
+  IconHome,
+  IconFolder,
+  IconStar,
+  IconChart,
+  IconSave,
+  IconGame,
+  IconLogout,
+  IconChevron,
+} from "./icons";
 
 const linkBase =
-  "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors";
-const inactive = "text-gray-300 hover:bg-gray-700";
-const active = "bg-blue-600 text-white";
+  "group flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-150";
+const inactive = "text-gray-300 hover:bg-gray-800 hover:text-white";
+const active = "bg-blue-600 text-white hover:bg-blue-500";
 
 export default function Sidebar({ loggedIn, onLogout }) {
   const [collapsed, setCollapsed] = useState(false);
-  const navigate = useNavigate();
 
   return (
     <aside
@@ -35,10 +44,16 @@ export default function Sidebar({ loggedIn, onLogout }) {
       </div>
 
       <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-60 bg-gray-700 text-white rounded-full px-2 py-1 text-xs border border-gray-600 hover:bg-gray-600 transition"
+        type="button"
+        onClick={() => setCollapsed((c) => !c)}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="absolute -right-4 top-60 bg-gray-700 text-white rounded-full p-2 border border-gray-600 hover:bg-gray-600 transition"
       >
-        {collapsed ? ">" : "<"}
+        {collapsed ? (
+          <IconChevron direction="right" />
+        ) : (
+          <IconChevron direction="left" />
+        )}
       </button>
 
       <nav className="flex-1 px-2 py-2 space-y-1">
@@ -48,7 +63,10 @@ export default function Sidebar({ loggedIn, onLogout }) {
             `${linkBase} ${isActive ? active : inactive}`
           }
         >
-          <span className="w-5 flex justify-center text-base">🏠</span>
+          <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+            {" "}
+            <IconHome />
+          </span>
           {!collapsed && <span>Home</span>}
         </NavLink>
 
@@ -60,7 +78,10 @@ export default function Sidebar({ loggedIn, onLogout }) {
                 `${linkBase} ${isActive ? active : inactive}`
               }
             >
-              <span className="w-5 flex justify-center text-base">📁</span>
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                {" "}
+                <IconFolder />
+              </span>
               {!collapsed && <span>Collection</span>}
             </NavLink>
 
@@ -70,7 +91,10 @@ export default function Sidebar({ loggedIn, onLogout }) {
                 `${linkBase} ${isActive ? active : inactive}`
               }
             >
-              <span className="w-5 flex justify-center text-base">⭐</span>
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                {" "}
+                <IconStar />
+              </span>
               {!collapsed && <span>Dream List</span>}
             </NavLink>
 
@@ -82,10 +106,13 @@ export default function Sidebar({ loggedIn, onLogout }) {
             <button
               type="button"
               disabled
-              className={`${linkBase} ${inactive} opacity-50 cursor-not-allowed`}
+              className={`${linkBase} opacity-50 cursor-not-allowed text-gray-300`}
               title="Coming soon"
             >
-              <span className="w-5 flex justify-center text-base">📊</span>
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                {" "}
+                <IconChart />
+              </span>
               {!collapsed && <span>Trends</span>}
             </button>
 
@@ -95,18 +122,39 @@ export default function Sidebar({ loggedIn, onLogout }) {
                 `${linkBase} ${isActive ? active : inactive}`
               }
             >
-              <span className="w-5 flex justify-center text-base">💾</span>
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                {" "}
+                <IconSave />
+              </span>
               {!collapsed && <span>Backup</span>}
             </NavLink>
 
             <button
               type="button"
               disabled
-              className={`${linkBase} ${inactive} opacity-50 cursor-not-allowed`}
+              className={`${linkBase} opacity-50 cursor-not-allowed text-gray-300`}
               title="Playthroughs coming soon"
             >
-              <span className="w-5 flex justify-center text-base">🎮</span>
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                {" "}
+                <IconGame />
+              </span>
               {!collapsed && <span>Playthroughs</span>}
+            </button>
+
+            <button
+              type="button"
+              onClick={onLogout}
+              className="group flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-150 w-full text-gray-300"
+            >
+              <span className="w-5 flex justify-center text-gray-300 group-hover:text-white">
+                <IconLogout />
+              </span>
+              {!collapsed && (
+                <span className="group-hover:text-white transition-colors">
+                  Log Out
+                </span>
+              )}
             </button>
           </>
         )}

@@ -9,13 +9,18 @@ export default function CardModal({
   onMoveToDreamList,
   onDelete,
 }) {
-  if (!card) return null;
-
   useEffect(() => {
-    const handleEsc = (e) => e.key === "Escape" && onClose();
+    if (!card) return;
+
+    const handleEsc = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [onClose]);
+  }, [card, onClose]);
+
+  if (!card) return null;
 
   const imageSrc =
     card.imageUrl ||
@@ -65,10 +70,20 @@ export default function CardModal({
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-3 right-3 text-gray-300 hover:text-white text-lg"
+          type="button"
+          className="absolute top-3 right-3 text-gray-300 hover:text-white p-2"
           onClick={onClose}
+          aria-label="Close modal"
         >
-          ✕
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              d="M6 6l12 12M18 6L6 18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
         </button>
 
         <div className="w-full flex justify-center mb-4">

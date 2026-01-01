@@ -57,15 +57,19 @@ export default function CardForm({ onAdd }) {
     const finalImage =
       fetched?.images?.large ||
       fetched?.images?.small ||
-      imageUrl ||
+      imageUrl.trim() ||
       "/vite.svg";
 
     const finalRarity = fetched?.rarity || rarity || "Unknown";
 
     const cardToSave = {
       id: crypto.randomUUID(),
-      name,
+      name: name.trim(),
       rarity: finalRarity,
+      images: {
+        small: finalImage,
+        large: finalImage,
+      },
       image: finalImage,
       owned: false,
     };
@@ -100,7 +104,7 @@ export default function CardForm({ onAdd }) {
     >
       <h3 className="text-lg font-semibold mb-3">Add a New Card</h3>
 
-      <div className="relative mb-2">
+      <div className="relative gap-2 mb-3 grid">
         <input
           type="text"
           value={name}
@@ -115,6 +119,22 @@ export default function CardForm({ onAdd }) {
             setTimeout(() => setShowSuggestions(false), 100);
           }}
           placeholder="Card Name"
+          className="w-full p-2 rounded bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
+        <input
+          type="text"
+          value={rarity}
+          onChange={(e) => setRarity(e.target.value)}
+          placeholder="Rarity (optional)"
+          className="w-full p-2 rounded bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+        />
+
+        <input
+          type="text"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="Image URL (optional)"
           className="w-full p-2 rounded bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
         />
 
@@ -133,22 +153,6 @@ export default function CardForm({ onAdd }) {
           </div>
         )}
       </div>
-
-      <input
-        type="text"
-        value={rarity}
-        onChange={(e) => setRarity(e.target.value)}
-        placeholder="Rarity (optional)"
-        className="w-full mb-2 p-2 rounded bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-      />
-
-      <input
-        type="text"
-        value={imageUrl}
-        onChange={(e) => setImageUrl(e.target.value)}
-        placeholder="Image URL (optional)"
-        className="w-full mb-2 p-2 rounded bg-gray-700 text-white focus:ring-2 focus:ring-blue-500 outline-none"
-      />
 
       {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
       {loading && <p className="text-gray-400 text-sm mb-2">Searching…</p>}

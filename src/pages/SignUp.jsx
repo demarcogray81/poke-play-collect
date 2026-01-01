@@ -23,10 +23,11 @@ export default function SignUp({ onSignUp }) {
     <div className="max-w-md mx-auto mt-16 bg-gray-800 p-6 rounded-lg shadow-lg text-white">
       <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
           type="email"
-          className="w-full p-2 mb-3 rounded bg-gray-700"
+          className="w-full p-2 rounded bg-gray-700 text-white placeholder:text-gray-400
+             focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -34,13 +35,13 @@ export default function SignUp({ onSignUp }) {
 
         <input
           type="password"
-          className="w-full p-2 mb-3 rounded bg-gray-700"
+          className="w-full p-2 rounded bg-gray-700 text-white placeholder:text-gray-400
+             focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-
-        {error && <p className="text-red-400 mb-3">{error}</p>}
+        {error && <p className="text-red-400">{error}</p>}
 
         <button
           type="submit"

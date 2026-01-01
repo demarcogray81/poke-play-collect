@@ -131,20 +131,17 @@ If the API or proxy responds with errors (like 504 Gateway Timeout), the app:
    npm install
    ```
 
-2. Create a .env file in the project root with:
+2. Copy `.env.example` to `.env` (project root) and set your server-side API key:
 
    ```bash
-   VITE_TCG_API_KEY=your_real_pokemontcg_key_here
-   VITE_TCG_PROXY_BASE=http://localhost:5174/api/tcg/cards
+   TCG_API_KEY=your_real_pokemontcg_key_here
+   # Optional: raise/lower upstream timeout (ms)
+   UPSTREAM_TIMEOUT_MS=30000
+   # Optional: proxy port (Vite already proxies /api -> 5174 by default)
+   PROXY_PORT=5174
    ```
 
-3. Start the Pokémon TCG proxy server (Terminal 1):
-
-   ```bash
-   npm run proxy
-   ```
-
-4. Start the React dev server (Terminal 2):
+3. Start the app (this runs **both** Vite + the proxy together):
 
    ```bash
    npm run dev

@@ -26,11 +26,9 @@ import {
   saveDreamList,
 } from "./utils/storage";
 
-// Simple route guard
 function RequireAuth({ loggedIn, children }) {
   const location = useLocation();
   if (!loggedIn) {
-    // send them home (or change to "/signin" if you prefer)
     return <Navigate to="/" replace state={{ from: location }} />;
   }
   return children;
@@ -45,6 +43,7 @@ export default function App() {
   });
   const [dreamList, setDreamList] = useState(getDreamList() || []);
   const [searchTerm, setSearchTerm] = useState("");
+  const [homeCache, setHomeCache] = useState(() => ({ pages: {} }));
 
   const { loggedIn, user, signup, login, logout } = useAuth();
 
@@ -55,7 +54,7 @@ export default function App() {
 
   const handleLogout = () => {
     logout();
-    navigate("/", { replace: true }); // ✅ always return home on sign out
+    navigate("/", { replace: true });
   };
 
   const addToCollection = (card) => {
@@ -73,10 +72,10 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white overflow-x-hidden">
+    <div className="flex min-h-screen bg-gray-900 text-white">
       <Sidebar loggedIn={loggedIn} onLogout={handleLogout} />
 
-      <div className="flex flex-col flex-1 w-full">
+      <div className="flex flex-col flex-1 min-w-0">
         <Header
           onSearch={setSearchTerm}
           loggedIn={loggedIn}
@@ -93,6 +92,8 @@ export default function App() {
                   onAddToCollection={addToCollection}
                   onAddToDreamList={addToDreamList}
                   searchTerm={searchTerm}
+                  homeCache={homeCache}
+                  setHomeCache={setHomeCache}
                 />
               }
             />
