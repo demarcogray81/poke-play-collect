@@ -44,8 +44,14 @@ export default function App() {
   const [dreamList, setDreamList] = useState(getDreamList() || []);
   const [searchTerm, setSearchTerm] = useState("");
   const [homeCache, setHomeCache] = useState(() => ({ pages: {} }));
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
 
   const { loggedIn, user, signup, login, logout } = useAuth();
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     saveCollection(collection);
@@ -72,18 +78,25 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
-      <Sidebar loggedIn={loggedIn} onLogout={handleLogout} />
+    <div className="flex h-screen bg-gray-900 text-white flex-col min-[430px]:flex-row overflow-hidden">
+      <Sidebar
+        loggedIn={loggedIn}
+        onLogout={handleLogout}
+        mobileOpen={mobileOpen}
+        setMobileOpen={setMobileOpen}
+      />
 
-      <div className="flex flex-col flex-1 min-w-0">
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Header
           onSearch={setSearchTerm}
+          onMenu={() => setMobileOpen((prev) => !prev)}
+          mobileOpen={mobileOpen}
           loggedIn={loggedIn}
           user={user}
           onLogout={handleLogout}
         />
 
-        <main className="flex-1 p-4 md:p-6">
+        <main className="flex-1 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6">
           <Routes>
             <Route
               path="/"

@@ -20,6 +20,11 @@
   }
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   background-color: #020617;
   color: #ffffff;

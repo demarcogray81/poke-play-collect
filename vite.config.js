@@ -5,9 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": {
+      "/api/tcg": {
         target: "http://localhost:5174",
         changeOrigin: true,
+        secure: false,
       },
     },
   },

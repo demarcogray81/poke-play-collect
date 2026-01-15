@@ -88,7 +88,7 @@ export default function Backup() {
   };
 
   return (
-    <main className="px-4 py-8 md:px-8 text-gray-100">
+    <div className="w-full min-w-0 overflow-x-hidden px-4 py-8 md:px-8 text-gray-100">
       <h1 className="text-2xl md:text-3xl font-bold mb-2 text-blue-400">
         Backup
       </h1>
@@ -100,7 +100,7 @@ export default function Backup() {
         </span>
       </p>
 
-      <section className="grid gap-6 md:grid-cols-2 max-w-4xl">
+      <section className="grid w-full min-w-0 gap-6 md:grid-cols-2 max-w-4xl mx-auto">
         <div className="bg-gray-900 border border-gray-800 rounded-lg p-4 shadow">
           <h2 className="text-lg font-semibold mb-2">Export data</h2>
           <p className="text-sm text-gray-400 mb-4">
@@ -125,7 +125,10 @@ export default function Backup() {
               type="file"
               accept="application/json"
               onChange={handleImportFile}
-              className="block text-sm text-gray-300"
+              className="block w-full max-w-full overflow-hidden text-sm text-gray-300
+             file:mr-3 file:rounded-md file:border-0
+             file:bg-gray-700 file:px-3 file:py-2 file:text-white
+             file:hover:bg-gray-600"
             />
           </div>
 
@@ -139,7 +142,8 @@ export default function Backup() {
                 rows={6}
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                className="w-full rounded bg-gray-800 border border-gray-700 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full max-w-full min-w-0 rounded bg-gray-800 border border-gray-700 p-2 text-sm
+             focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Paste backup JSON here..."
               />
               <button
@@ -156,6 +160,6 @@ export default function Backup() {
       {status && (
         <p className="mt-6 text-sm text-gray-300 max-w-xl">{status}</p>
       )}
-    </main>
+    </div>
   );
 }

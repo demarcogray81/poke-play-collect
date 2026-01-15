@@ -57,7 +57,8 @@ export default function Home({
           ...(prev || {}),
           pages: { ...(prev?.pages || {}), [page]: data },
         }));
-      } catch (e) {
+      } catch (err) {
+        console.error("Failed to load cards", err);
         if (!ignore) setError("Couldn’t load cards right now.");
       } finally {
         if (!ignore) setLoading(false);

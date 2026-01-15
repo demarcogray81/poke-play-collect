@@ -1,16 +1,23 @@
 import { cacheRead, cacheWrite } from "./cache";
 
-const PROD_API_BASE = "https://poke-play-collect.onrender.com/api/tcg";
+const PROD_API_BASE = "/api/tcg";
 const DEV_API_BASE = "/api/tcg";
-const API_BASE = import.meta.env.DEV ? DEV_API_BASE : PROD_API_BASE;
+const PUBLIC_API_BASE = "https://api.pokemontcg.io/v2";
 
-const makeUrl = (path) => `${API_BASE}${path}`;
+const CUSTOM_API_BASE = (import.meta.env.VITE_API_BASE || "").trim();
+const API_BASE =
+  CUSTOM_API_BASE || (import.meta.env.DEV ? DEV_API_BASE : PUBLIC_API_BASE);
+
+const makeUrl = (base, path) => `${base}${path}`;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function apiFetch(path, { timeoutMs = 60000, retries = 2 } = {}) {
-  const url = makeUrl(path);
-
+async function fetchWithBase(
+  base,
+  path,
+  { timeoutMs = 60000, retries = 2 } = {}
+) {
+  const url = makeUrl(base, path);
   for (let attempt = 0; attempt <= retries; attempt++) {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), timeoutMs);
@@ -37,20 +44,37 @@ async function apiFetch(path, { timeoutMs = 60000, retries = 2 } = {}) {
         continue;
       }
 
-      if (!res.ok)
-        throw new Error(json?.error || `Request failed (${res.status})`);
+      if (!res.ok) {
+        const error = new Error(
+          json?.error || `Request failed (${res.status})`
+        );
+        error.status = res.status;
+        throw error;
+      }
       return json;
     } catch (err) {
       clearTimeout(t);
       if (attempt === retries) {
-        throw new Error(
+        const finalError = new Error(
           err?.name === "AbortError"
             ? "Request timed out"
             : err?.message || String(err)
         );
+        finalError.status = err?.status;
+        throw finalError;
       }
       await sleep(600 * (attempt + 1));
     }
+  }
+}
+
+async function apiFetch(path, options = {}) {
+  try {
+    return await fetchWithBase(API_BASE, path, options);
+  } catch (err) {
+    if (API_BASE === PUBLIC_API_BASE) throw err;
+    if (err?.status && err.status !== 404) throw err;
+    return fetchWithBase(PUBLIC_API_BASE, path, options);
   }
 }
 
