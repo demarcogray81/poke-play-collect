@@ -1,25 +1,30 @@
 const COLLECTION_KEY = "poke_collection";
 const DREAM_LIST_KEY = "poke_dream_list";
 
-const STORAGE_VERSION_KEY = "poke_storage_version";
 const STORAGE_VERSION = "1";
-function ensureStorageVersion() {
+const VERSION_KEY = "poke_storage_version";
+
+export function ensureStorageVersion() {
   try {
-    const current = localStorage.getItem(STORAGE_VERSION_KEY);
+    const current = localStorage.getItem(VERSION_KEY);
 
     if (current !== STORAGE_VERSION) {
+      console.warn(
+        `[PokéLog] Storage version mismatch (have: ${current}, expected: ${STORAGE_VERSION}). Resetting saved data.`
+      );
+
       localStorage.removeItem(COLLECTION_KEY);
       localStorage.removeItem(DREAM_LIST_KEY);
-      localStorage.setItem(STORAGE_VERSION_KEY, STORAGE_VERSION);
+
+      localStorage.setItem(VERSION_KEY, STORAGE_VERSION);
     }
   } catch (err) {
-    console.error("Error ensuring storage version:", err);
+    console.error("Error checking storage version:", err);
   }
 }
 
 export function saveToStorage(key, data) {
   try {
-    ensureStorageVersion();
     localStorage.setItem(key, JSON.stringify(data));
   } catch (err) {
     console.error("Error saving to localStorage:", err);
@@ -28,7 +33,6 @@ export function saveToStorage(key, data) {
 
 export function loadFromStorage(key) {
   try {
-    ensureStorageVersion();
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : [];
   } catch (err) {

@@ -1,14 +1,13 @@
 import { useMemo, useState } from "react";
-import CardForm from "../components/CardForm";
 import CardGrid from "../components/CardGrid";
 import CardModal from "../components/CardModal";
 import { TYPE_FILTER_OPTIONS, matchesTypeFilter } from "../utils/cardFilters";
 
-export default function MyCards({
-  collection,
-  setCollection,
+export default function DreamList({
   dreamList,
   setDreamList,
+  collection,
+  setCollection,
 }) {
   const [selectedCard, setSelectedCard] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,28 +19,15 @@ export default function MyCards({
   const [confirmText, setConfirmText] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
 
-  const addCard = (card) => {
-    const withOwned = { ...card, owned: true };
-    setCollection([...collection, withOwned]);
+  const removeFromDreamList = (id) => {
+    setDreamList(dreamList.filter((card) => card.id !== id));
   };
 
-  const removeCard = (id) => {
-    setCollection(collection.filter((card) => card.id !== id));
-  };
-
-  const moveToDreamList = (card) => {
-    if (!dreamList.some((c) => c.id === card.id)) {
-      setDreamList([...dreamList, { ...card, owned: false }]);
+  const moveToCollection = (card) => {
+    if (!collection.some((c) => c.id === card.id)) {
+      setCollection([...collection, { ...card, owned: true }]);
     }
-    setCollection(collection.filter((c) => c.id !== card.id));
-  };
-
-  const toggleOwned = (id) => {
-    setCollection(
-      collection.map((card) =>
-        card.id === id ? { ...card, owned: !card.owned } : card
-      )
-    );
+    setDreamList(dreamList.filter((c) => c.id !== card.id));
   };
 
   const openConfirm = (message, action) => {
@@ -62,7 +48,7 @@ export default function MyCards({
   };
 
   const sorted = useMemo(() => {
-    let result = [...collection];
+    let result = [...dreamList];
 
     result = result.filter((card) =>
       (card.name || "").toLowerCase().includes(searchTerm.toLowerCase())
@@ -87,30 +73,24 @@ export default function MyCards({
           return nameA.localeCompare(nameB);
         case "name-desc":
           return nameB.localeCompare(nameA);
-        case "owned-first":
-          return (b.owned ? 1 : 0) - (a.owned ? 1 : 0);
-        case "missing-first":
-          return (a.owned ? 1 : 0) - (b.owned ? 1 : 0);
         default:
           return 0;
       }
     });
 
     return result;
-  }, [collection, searchTerm, rarityFilter, typeFilter, sortOption]);
+  }, [dreamList, searchTerm, rarityFilter, typeFilter, sortOption]);
 
   return (
     <div className="text-center">
-      <h2 className="text-3xl font-bold text-blue-500 mb-4">My Cards</h2>
+      <h2 className="text-3xl font-bold text-pink-400 mb-4">Dream List</h2>
 
-      <CardForm onAdd={addCard} />
-
-      <div className="mt-6 flex flex-wrap justify-center gap-3 mb-2">
+      <div className="mt-2 flex flex-wrap justify-center gap-3 mb-2">
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search cards..."
+          placeholder="Search dream cards..."
           className="px-3 py-2 rounded bg-gray-800 text-white text-sm border border-gray-700 w-56"
         />
 
@@ -121,8 +101,6 @@ export default function MyCards({
         >
           <option value="name-asc">Name (A → Z)</option>
           <option value="name-desc">Name (Z → A)</option>
-          <option value="owned-first">Owned First</option>
-          <option value="missing-first">Missing First</option>
         </select>
 
         <select
@@ -163,22 +141,17 @@ export default function MyCards({
       <CardGrid
         cards={sorted}
         onSelect={setSelectedCard}
-        onToggleOwned={(id) =>
-          openConfirm("Toggle owned status for this card?", () =>
-            toggleOwned(id)
-          )
-        }
         onMove={(card) =>
-          openConfirm("Move this card to your Dream List?", () =>
-            moveToDreamList(card)
+          openConfirm("Move this card to your Collection?", () =>
+            moveToCollection(card)
           )
         }
         onRemove={(id) =>
-          openConfirm("Delete this card from your Collection?", () =>
-            removeCard(id)
+          openConfirm("Remove this card from your Dream List?", () =>
+            removeFromDreamList(id)
           )
         }
-        moveLabel="Move to Dream List"
+        moveLabel="Move to Collection"
       />
 
       <CardModal card={selectedCard} onClose={() => setSelectedCard(null)} />
